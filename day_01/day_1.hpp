@@ -23,8 +23,6 @@ CLASS_DEF(DAY) {
         });
     }
 
-    // not 1994 - high
-    // not 205 - low
     void v1() const override {
         int prev = numbers.back();
         int count = 0;
@@ -53,7 +51,6 @@ CLASS_DEF(DAY) {
         {
             int v = numbers.at(i);
             int other = numbers.at(counterpart(i));
-            std:: cout << v << " , " << other << "\n";
             if (other == v)
             {
                 count += v;
