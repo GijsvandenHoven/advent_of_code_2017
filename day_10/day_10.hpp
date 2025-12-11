@@ -121,11 +121,8 @@ CLASS_DEF(DAY) {
         std::array<uint8_t, 256> numbers{};
         std::iota(numbers.begin(), numbers.end(), 0);
 
-        auto print = [&]() { std::ranges::for_each(numbers, [](auto v) { std::cout << static_cast<int>(v) << ", "; }); };
-
         for (int i = 0; i < 64; ++i)
         {
-            print(); std::cout << "\n";
             knot_hash_step(position, skip_size, numbers, ascii_ranges);
         }
 
@@ -139,25 +136,6 @@ CLASS_DEF(DAY) {
         std::ranges::for_each(out, [&ss](char c) { ss << c; });
 
         reportSolution(ss.str());
-
-        std::cout << "\n\n\n\nTEST GROUND\n\n\n";
-        // std::array<uint8_t, 16> despair {{ 65, 27, 9, 1, 4, 3, 40, 50, 91, 7, 6, 0, 2, 5, 68, 22 }};
-        // std::array<uint8_t, 256> fake{};
-        // std::copy_n(despair.begin(), 16, fake.begin());
-        // std::array<uint8_t, 16> test_out{};
-        // sparse_to_dense(fake, test_out);
-        //
-        // for (int v : test_out)
-        // {
-        //     std::cout << v << ", ";
-        // }
-
-        // std::array<uint8_t, 16> despair {{ 64,7,255,0,0,0,0,0,0,0,0,0,0,0,0,0 }};
-        // std::array<char, 32> test_out{};
-        // dense_to_hex(despair, test_out);
-        // std::ostringstream test_ss;
-        // std::ranges::for_each(test_out, [&test_ss](char c) { test_ss << c; });
-        // std::cout << "? " << test_ss.str() << "\n";
     }
 
     void parseBenchReset() override {
