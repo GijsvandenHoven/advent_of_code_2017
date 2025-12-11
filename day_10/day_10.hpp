@@ -43,20 +43,19 @@ CLASS_DEF(DAY) {
         ascii_ranges.emplace_back(47);
         ascii_ranges.emplace_back(23);
 
-        std::ranges::for_each(ascii_ranges, [](int v) { std::cout << v << ", "; });
-        std::cout << "\n";
+        // std::ranges::for_each(ascii_ranges, [](int v) { std::cout << v << ", "; });
+        // std::cout << "\n";
     }
 
     static void knot_hash_step(uint8_t& position, uint8_t& skip_size, std::array<uint8_t, 256>& numbers, const std::vector<uint8_t>& inputs)
     {
         for (uint8_t range : inputs)
         {
-            std::cout << "knot hash w/ " << static_cast<int>(position) << " , " << static_cast<int>(skip_size) << ": " << static_cast<int>(range) << std::endl;
             uint8_t start = position;
             uint8_t end = position + range - 1;
 
             int reversals = range / 2;
-            for (int i = 0; i <= reversals; ++i)
+            for (int i = 0; i < reversals; ++i)
             {
                 std::swap(numbers.at(start), numbers.at(end));
                 ++start;
@@ -122,8 +121,11 @@ CLASS_DEF(DAY) {
         std::array<uint8_t, 256> numbers{};
         std::iota(numbers.begin(), numbers.end(), 0);
 
+        auto print = [&]() { std::ranges::for_each(numbers, [](auto v) { std::cout << static_cast<int>(v) << ", "; }); };
+
         for (int i = 0; i < 64; ++i)
         {
+            print(); std::cout << "\n";
             knot_hash_step(position, skip_size, numbers, ascii_ranges);
         }
 
