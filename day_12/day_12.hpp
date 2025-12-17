@@ -126,7 +126,7 @@ CLASS_DEF(DAY) {
     }
 
     void parseBenchReset() override {
-        // none
+        graph.clear();
     }
 
     private:
