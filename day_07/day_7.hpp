@@ -154,7 +154,7 @@ CLASS_DEF(DAY) {
     void v2() const override {
         // Worked out by hand by filling in manually in this line the node that is unbalanced program output.
         auto [root_name, root_node] = *graph.find("lahahn");
-        root_node.are_children_balanced();
+        (void) root_node.are_children_balanced();
 
         // Workout:
         //
