@@ -73,6 +73,9 @@ struct Device
     int64_t instruction_pointer = 0;
     int64_t last_played_sound = -1;
 
+    std::queue<int64_t> send_queue{};
+    std::queue<int64_t> receive_queue{};
+
     bool halt(const std::function<bool()>& termination_cond = []{ return false; }) const
     {
         return instruction_pointer < 0 || instruction_pointer >= program.size() || termination_cond();
@@ -204,6 +207,40 @@ struct JumpInstruction : Instruction
     }
 };
 
+struct ReceiveInstruction : Instruction
+{
+    explicit ReceiveInstruction(std::unique_ptr<Operand>&& op)
+    {
+        operands.at(0) = std::move(op);
+    }
+
+    void Execute(Device& d) const override
+    {
+        if (d.receive_queue.empty()) throw std::logic_error("Receive on empty queue was called.");
+
+        int64_t v = d.receive_queue.front();
+        d.receive_queue.pop();
+
+        std::cout << "Receive: " << operands.at(0)->get_register_name() << " (" << v << ") w/ queuesize: " << d.receive_queue.size() << "\n";
+        auto& out = d.registers.at(operands.at(0)->get_register_name());
+        out = v;
+    }
+};
+
+struct SendInstruction : Instruction
+{
+    explicit SendInstruction(std::unique_ptr<Operand>&& op)
+    {
+        operands.at(0) = std::move(op);
+    }
+
+    void Execute(Device& d) const override
+    {
+        std::cout << "Send: " << operands.at(0)->get_value(d.registers) << "w/ queuesize: " << d.send_queue.size() << "\n";
+        d.send_queue.push(operands.at(0)->get_value(d.registers));
+    }
+};
+
 constexpr uint64_t operator ""_concat(const char* s, std::size_t n)
 {
     if (n >= 8) throw std::logic_error("Operand overflow");
@@ -238,7 +275,7 @@ public:
 class InstructionFactory
 {
 public:
-    static std::unique_ptr<Instruction> build(const std::string& ins, const std::string& op1, const std::string& op2)
+    static std::unique_ptr<Instruction> build(const std::string& ins, const std::string& op1, const std::string& op2, bool p2 = false)
     {
         switch (operator""_concat(ins.c_str(), ins.size()))
         {
@@ -251,11 +288,23 @@ public:
             case "mod"_concat:
                 return std::make_unique<ModuloInstruction>(OperandFactory::build(op1), OperandFactory::build(op2));
             case "rcv"_concat:
-                return std::make_unique<RecoverInstruction>(OperandFactory::build(op1));
+                if (p2)
+                {
+                    return std::make_unique<ReceiveInstruction>(OperandFactory::build(op1));
+                } else
+                {
+                    return std::make_unique<RecoverInstruction>(OperandFactory::build(op1));
+                }
             case "jgz"_concat:
                 return std::make_unique<JumpInstruction>(OperandFactory::build(op1), OperandFactory::build(op2));
             case "snd"_concat:
-                return std::make_unique<SoundInstruction>(OperandFactory::build(op1));
+                if (p2)
+                {
+                    return std::make_unique<SendInstruction>(OperandFactory::build(op1));
+                } else
+                {
+                    return std::make_unique<SoundInstruction>(OperandFactory::build(op1));
+                }
             default:
                 throw std::logic_error("Unknown instruction conversion");
         }
@@ -280,6 +329,7 @@ CLASS_DEF(DAY) {
 
             std::cout << ins << ", " << opA << ", " << opB << "\n";
             program.emplace_back(InstructionFactory::build(ins, opA, opB));
+            p2_program.emplace_back(InstructionFactory::build(ins, opA, opB, true));
         }
     }
 
@@ -292,6 +342,18 @@ CLASS_DEF(DAY) {
             bool is_nonzero = ins->operands.at(0)->get_value(d.registers) != 0;
 
             return is_rcv && is_nonzero;
+        };
+    }
+
+    static std::function<bool()> problem_2_halt_condition(const Device& d)
+    {
+        return [&]() -> bool
+        { // halt when a device is pointed at a 'receive' instruction and its 'receive' queue is empty.
+            auto& ins = d.program.at(d.instruction_pointer);
+            bool is_rcv = dynamic_cast<const ReceiveInstruction*>(ins.get()) != nullptr;
+            bool has_nothing = d.receive_queue.empty();
+
+            return is_rcv && has_nothing;
         };
     }
 
@@ -309,15 +371,40 @@ CLASS_DEF(DAY) {
     }
 
     void v2() const override {
-        reportSolution(0);
+        Device d1 {p2_program};
+        Device d2 {p2_program};
+        d2.registers.at('p') = 1;
+
+        auto d1_halter = problem_2_halt_condition(d1);
+        auto d2_halter = problem_2_halt_condition(d2);
+
+        size_t values_sent_by_d2 = 0;
+        while (! (d1.halt(d1_halter) && d2.halt(d2_halter)))
+        {
+            while (! d1.halt(d1_halter))
+            {
+                d1.execute();
+            }
+            d2.receive_queue = std::move(d1.send_queue);
+            while (! d2.halt(d2_halter))
+            {
+                d2.execute();
+            }
+            values_sent_by_d2 += d2.send_queue.size();
+            d1.receive_queue = std::move(d2.send_queue);
+        }
+
+        reportSolution(values_sent_by_d2);
     }
 
     void parseBenchReset() override {
         program.clear();
+        p2_program.clear();
     }
 
     private:
     std::vector<std::unique_ptr<const Instruction>> program;
+    std::vector<std::unique_ptr<const Instruction>> p2_program;
 };
 
 } // namespace
