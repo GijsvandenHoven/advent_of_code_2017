@@ -7,6 +7,12 @@
 
 #define DAY 18
 
+#define QUIET true
+
+#if QUIET
+#define cout ostringstream{} // just nuke all the std::cout, convert to a stringstream that does not get used. I wonder if compilation will then optimize out the operation?
+#endif
+
 NAMESPACE_DEF(DAY) {
 
 using Register_t = std::map<char, int64_t>;
@@ -408,5 +414,9 @@ CLASS_DEF(DAY) {
 };
 
 } // namespace
+
+#if QUIET
+#undef cout
+#endif
 
 #undef DAY
