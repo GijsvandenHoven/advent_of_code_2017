@@ -46,3 +46,30 @@ We know c = 2 and c' = 3, because of the given v and p starts...
 
 
 for both of these, if i add the factor of the double integral on a to the value of v as well, the formula fits (But why? Man I sucked at physics in school)
+
+
+====================================================
+
+Part 2: let's say we want to see if these two collide.
+x = -1 t^2 + -t + 4
+x = -0.5t^2 + 1.5t + 3
+
+make them equal:
+
+-1 t^2 + -t + 4 = -0.5t^2 + 1.5t + 3
+simplify
+(-1 + 0.5)t^2 + -2.5t + (4-3)
+-0.5t^2 - 2.5t + 1 = 0
+solve this equation.
+D = b^2 - 4ac ->  (6.25) - 4 (-0.5) -> 6.25 - -2 = 8.25
+
+(-b +/- sqrt(D)) / 2a -> (2.5 + sqrt(8.25))/-1  or (2.5 - sqrt(8.25))/-1
+0,372281323  or    −5,372281323
+Then eliminate anything that is negative and/or non-integer.
+
+In code approach: Do this just for the X component. Calculate any candidate T, check if all 3 equal.
+
+How to ""simplify the equation"" in code?
+    given something like -1 t^2 -t + 4  = -0.5t^2 + 1.5t + 3
+        Computer sees -1, -1, 4, | -0.5, 1.5, 3 (the A,B,C for the 3)
+            Just subtract A2,B2,C2 from A1,B1,C1.
