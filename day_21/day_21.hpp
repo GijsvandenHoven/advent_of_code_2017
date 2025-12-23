@@ -194,14 +194,12 @@ CLASS_DEF(DAY) {
         const size_t y_in_block_offset = in_subdivision_size * in_row_size;
 
         const size_t out_subdivision_rows = out_row_size / out_subdivision_size;
-        const size_t out_subdivision_blocks = out_subdivision_rows * out_subdivision_rows;
+        // const size_t out_subdivision_blocks = out_subdivision_rows * out_subdivision_rows;
 
         const size_t x_out_block_offset = out_subdivision_size;
         const size_t y_out_block_offset = out_subdivision_size * out_row_size;
         
         for (size_t i = 0; i < in_subdivision_blocks; ++i) {
-            std::vector<bool> sub_grid(in_subdivision_size * in_subdivision_size);
-
             const size_t x_in_block = i % in_subdivision_rows;
             const size_t y_in_block = i / in_subdivision_rows;
 
