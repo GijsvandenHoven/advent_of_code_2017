@@ -1,0 +1,36 @@
+Using the `.halt` function parameter i can have a basic debugger that lets me print anything I want before execution of an instruction.
+
+Printing the instruction pointer (IP) shows me that we waste a lot of time in a loop that starts at IP=11 (set g d).
+    It acts as a countdown on G from -110K to 0.
+The state of the registers before this loop starts:
+
+a: 1
+b: 109900
+c: 126900
+d: 2
+e: 2
+f: 1
+(others zero)
+
+starting from e == 2, d == 2,
+
+It is trying to find d * e == b
+with a loop on incrementing e from 2 until b
+if this (inner) loop is over, g == e,
+    then increment d
+        until d == b.
+        
+if ever d * e == b, then f is set to 0
+    after a full loop of d and e from 2..b, it checks if f was zero: if it is, increment h.
+        So we only increment h if there exists no d, e in 2..b such that d * e == b.
+            In other words, if d is a prime number, increment h.
+            
+After one prime number check, check if b == c
+    if yes, terminate.
+    if not, we increment b by seventeen. 
+        because C is 17,000 higher than b, we repeat this 1000 times.
+        
+So the program is trying to find primes in n * 17 + 109900 for n 0...10000
+
+^^^^ NO!!! it's checking _not_ primes for that range. We are counting _not_ primes. There are 88 primes in the range, and 913 not primes. The answer is 913. Lot of time lost on finding that mistake.
+We set f = 0 when a factorisation of the b register is found with d and e.
